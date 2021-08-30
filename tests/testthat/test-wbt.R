@@ -162,8 +162,8 @@ test_that("wbt utility functions [requires WhiteboxTools installed]", {
   #       with the default value for tool_name `NULL` we can still expect character result,
   #       but on Windows the result is Rust error string resulting in test noise:
   #         thread 'main' panicked at 'Unrecognized tool name ...'
-  #       Skip on Windows for now
-  skip_if(Sys.info()[["sysname"]] == "Windows")
+  #       Skip on Windows for now until we use processx
+  # skip_if(Sys.info()[["sysname"]] == "Windows")
   expect_true(is.character(wbt_toolbox()))
   expect_true(is.character(wbt_tool_help()))
 })

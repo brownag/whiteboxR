@@ -16,6 +16,7 @@ BugReports: https://github.com/giswqs/whiteboxR/issues
 Suggests: 
     knitr,
     rmarkdown,
+    processx,
     testthat,
     raster,
     rgdal

@@ -618,10 +618,12 @@ wbt_system_call <- function(argstring,
                             tool_name = NULL,
                             command_only = FALSE,
                             ignore.stderr = FALSE,
-                            shell_quote = TRUE) {
-    
+                            shell_quote = FALSE) {
+  
+  use_processx <- requireNamespace("processx")
+  
   wbt_init()
-  wbt_exe <- wbt_exe_path(shell_quote = shell_quote)
+  wbt_exe <- wbt_exe_path(shell_quote = !use_processx)
   args2 <- argstring
   
   # messages about misspecified arguments (e.g. tool_name to wbt_tool_help())
@@ -668,15 +670,31 @@ wbt_system_call <- function(argstring,
                     "  whitebox.exe_path: ", wbt_exe, "; File exists? ", 
                                                          file.exists(wbt_exe_path(shell_quote = FALSE)),
                     "\n  Arguments: ", args2)
-  ret <- try(suppressWarnings(tryCatch(
-    system(exeargs, intern = TRUE, ignore.stderr = ignore.stderr, ignore.stdout = FALSE),
-    error = function(err) stop(stopmsg, "\n\n", err, call. = FALSE)
-  )), silent = TRUE)
   
-  if (inherits(ret, 'try-error')) {
-    message(ret[[1]])
-    ret <- ret[[1]]
-  } else if (!is.null(attr(ret, "status"))) {
+  # processx helps us get around shell quoting edge cases
+  if (use_processx) {
+    result <- try(processx::run(wbt_exe, strsplit(args2, " ")[[1]]), silent = TRUE)
+    if (!inherits(result, 'try-error')){
+      ret <- strsplit(result$stdout, "\n")[[1]]
+      ret <- ret[ret != ""]
+      attr(ret, 'status') <- result$status
+      attr(ret, 'stderr') <- result$stderr
+    } else {
+      ret <- result[[1]]
+      message(ret)
+    }
+  } else {
+    ret <- try(suppressWarnings(tryCatch(
+      system(exeargs, intern = TRUE, ignore.stderr = ignore.stderr, ignore.stdout = FALSE), error = function(err) stop(stopmsg, "\n\n", err, call. = FALSE)
+    )), silent = TRUE)
+
+    if (inherits(ret, 'try-error')) {
+      message(ret[[1]])
+      ret <- ret[[1]]
+    }
+  }
+  statuscode <- attr(ret, "status")
+  if (!is.null(statuscode) && statuscode != 0) {
     message(stopmsg, "\n")
     message("System command had status ", attr(ret,"status"))
     if (length(ret) == 0 || nchar(ret) == 0) {
