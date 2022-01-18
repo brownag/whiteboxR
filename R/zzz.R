@@ -40,3 +40,37 @@ check_whitebox_binary <- function(silent = TRUE) {
   }
   res
 }
+
+#' @importFrom jsonlite read_json
+# returns TRUE if settings.json is present in R working directory, FALSE otherwise
+check_settings_json <- function(wd = NULL) {
+  if (!requireNamespace('jsonlite'))
+    stop('package `jsonlite` is required', call. = FALSE)
+  
+  # check R working directory for settings.json
+  if (file.exists("settings.json")) {
+    # read it
+    x <- jsonlite::read_json("settings.json")
+    
+    # get current package wd option
+    wbtwd <- wbt_wd()
+    
+    if (wbtwd != "" & length(wd) > 0) {
+      
+      # append "/"
+      if (!endsWith(wd, "/"))
+        wd <- paste0(wd, "/")
+      if (!endsWith(wbtwd, "/"))
+        wbtwd <- paste0(wbtwd, "/")
+      
+      # if the package option doesn't match the settings.json working_directory
+      #    or the value of `wd` argument (i.e. if wd is changing) then issue a warning
+      #    shouldn't happen, but changing package options/settings.json manually could cause it
+      if (wbtwd != x$working_directory & getwd() != x$working_directory & wd != wbtwd)
+        warning("settings.json in ", getwd(), " has different working_directory (",
+                x$working_directory, ") than wbt_wd() (", wbtwd, ")!", call. = FALSE)
+      return(TRUE)
+    }
+  }
+  FALSE
+}

@@ -20,7 +20,7 @@ wbt_init <- function(exe_path = wbt_exe_path(shell_quote = FALSE), ...) {
   initargs <- list(...)
   wd <- initargs[["wd"]]
   verbose <- initargs[["verbose"]]
-  
+   
   if (!is.character(exe_path) || length(exe_path) != 1) {
     stop("exe_path must be a character vector with length 1", call. = FALSE)
   }
@@ -48,6 +48,12 @@ wbt_init <- function(exe_path = wbt_exe_path(shell_quote = FALSE), ...) {
       message("WhiteboxTools Executable Path (whitebox.exe_path) reverted to:\n\t", new_exe_path)
     }
   }
+  
+  if (getOption("whitebox.check_settings.json", default = FALSE)) {
+    # requires jsonlite
+    check_settings_json(wd = wd)
+  }
+  
   return(invisible(res1 && res2))
 }
 
@@ -86,14 +92,23 @@ wbt_options <- function(exe_path = NULL,
   
   # check user input, set package options
   if (!is.null(exe_path)) {
-    if (file.exists(exe_path)) exe_path <- path.expand(exe_path)
+    if (file.exists(exe_path)) {
+      exe_path <- path.expand(exe_path)
+    }
     options(whitebox.exe_path = exe_path)
   }
   
+  if (is.null(wd) || wd == "" || wd == getwd()) {
+    try(wbt_system_call(paste0("--wd=", getwd())), silent = TRUE)
+  }
+  
   if (!is.null(wd)) {
-    # preserve attributes if any on wd
-    if (dir.exists(wd)) wd[1] <- path.expand(wd)
-    options(whitebox.wd = wd) 
+    if (dir.exists(wd)) {
+      wd <- path.expand(wd)
+      try(wbt_system_call(paste0("--wd=", wd)), silent = TRUE)
+    }
+    
+    options(whitebox.wd = wd)
   }
   
   if (!is.null(verbose)) {
@@ -144,12 +159,12 @@ wbt_wd <- function(wd = NULL) {
   
   # system environment var takes precedence
   syswd <- Sys.getenv("R_WHITEBOX_WD")
+  curwd <- getwd()
   if (nchar(syswd) > 0 && dir.exists(syswd)) {
     return(syswd)
   }
 
   if (length(wd) > 0 && (is.na(wd) || wd == "")) {
-    curwd <- getwd()
     if(wbt_verbose()) {
       cat("Reset WhiteboxTools working directory to current R working directory:", curwd)
     }
@@ -157,6 +172,7 @@ wbt_wd <- function(wd = NULL) {
     if (wbt_verbose()) {
       cat("Unset WhiteboxTools working directory flag `whitebox.wd` / `--wd`\n")
     }
+    
     wd <- "" #structure(curwd, unset = TRUE)
   } 
   
@@ -721,7 +737,7 @@ wbt_system_call <- function(argstring,
                             ignore.stderr = FALSE,
                             shell_quote = TRUE) {
     
-  wbt_init()
+  # wbt_init()
   wbt_exe <- wbt_exe_path(shell_quote = shell_quote)
   args2 <- argstring
   

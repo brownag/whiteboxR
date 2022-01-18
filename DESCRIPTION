@@ -17,6 +17,7 @@ Suggests:
     knitr,
     rmarkdown,
     testthat,
+    jsonlite,
     raster,
     rgdal
 VignetteBuilder: knitr
