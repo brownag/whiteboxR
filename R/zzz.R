@@ -66,9 +66,8 @@ check_settings_json <- function(wd = NULL) {
       # if the package option doesn't match the settings.json working_directory
       #    or the value of `wd` argument (i.e. if wd is changing) then issue a warning
       #    shouldn't happen, but changing package options/settings.json manually could cause it
-      if (wbtwd != x$working_directory & getwd() != x$working_directory & wd != wbtwd)
-        warning("settings.json in ", getwd(), " has different working_directory (",
-                x$working_directory, ") than wbt_wd() (", wbtwd, ")!", call. = FALSE)
+      if (!is.null(x$working_directory) && wbtwd != x$working_directory && getwd() != x$working_directory && wd != wbtwd)
+        warning("settings.json in ", getwd(), " has different working_directory (", x$working_directory, ") than wbt_wd() (", wbtwd, ")!", call. = FALSE)
       return(TRUE)
     }
   }

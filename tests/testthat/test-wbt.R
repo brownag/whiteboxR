@@ -18,7 +18,7 @@ test_that("wbt initialization [WhiteboxTools missing]", {
 
   # unset options
   Sys.unsetenv("R_WHITEBOX_EXE_PATH")
-  options(whitebox.exe_path = "")
+  options(whitebox.exe_path = "", whitebox.check_settings.json = TRUE)
 
   # create a temporary file path (that does not yet exist)
   tf <- tempfile()
