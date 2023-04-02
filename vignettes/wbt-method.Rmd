@@ -1,5 +1,5 @@
 ---
-title: "`wbt()` method: call 'Whitebox' tools by name"
+title: "`wbt()` method: call 'WhiteboxTools' by name"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{`wbt()` and `wbt_result`}
@@ -19,9 +19,13 @@ knitr::opts_chunk$set(
 # `wbt()`
 
 The `wbt()` method is a high-level wrapper function to manage flow of
-information between R and WhiteboxTools. With `wbt()` one can run sequential
-analyses in Whitebox while having R prepare inputs, generate commands, and
-visualize results.
+information between **R** and 'WhiteboxTools'. It allows you to call 'WhiteboxTools' by name, and returns a result object that provides information about the execution of the specified tool.
+
+When a tool is executed using the `wbt()` method, the result object contains information about the execution of the tool, including the parameters that were passed to the 'WhiteboxTools' executable and references to any output file paths that were specified. If the system call succeeds, the result object provides information about the output, such as the data type and file path, which can be used for further analysis or integration with other spatial data sources and R object types.
+
+In the case of a failed system call, the result object may contain an error message. This provides valuable feedback to users for troubleshooting and debugging their code. By using the `wbt()` method, users can efficiently integrate 'WhiteboxTools' algorithms into their R workflows and take advantage of the powerful spatial analysis capabilities of 'WhiteboxTools' within a familiar R environment.
+
+This vignette provides several examples of using the `wbt()` method to call 'WhiteboxTools' by name with various R objects as input and illustrates how to work with the resulting output and result objects in R.
 
 ```{r}
 library(whitebox)
@@ -50,10 +54,7 @@ dem <- sample_dem_data()
 wbt("slope", dem = dem, output = file.path(tempdir(), "slope.tif"))
 ```
 
-Whether a system call succeeds or fails the parameters that were passed to the WhiteboxTools
-executable and references to any output file paths that were specified are
-returned. If output files reference spatial data (e.g. a GeoTIFF file) they may
-be converted to a file-based R object providing information about the result.
+If the output files specified by the tool reference spatial data, such as a GeoTIFF file, the `wbt()` method can convert them into R spatial objects. These file-based R objects can be further processed, analyzed, and visualized using various R packages such as terra, raster, or stars. The result object also provides information about the output R objects, such as the data type and file path, which can be used for further analysis or integration with other spatial data sources.
 
 ```{r}
 wbt("slope", goof = dem, output = file.path(tempdir(), "slope.tif"))
@@ -104,8 +105,8 @@ A feature of `wbt()` is that it handles input/output and file name management
 if you are using R objects as input. It can be an onerous task to manage files 
 for workflows involving many tool runs.
 
-If you use a `terra` object as input, you will get a `SpatRaster`. If you use 
-a `raster` object as your input object frontend, you will get a `RasterLayer`
+If you use a `terra` object as input object, you will get a `SpatRaster`. If you use 
+a `raster` object as your input, you will get a `RasterLayer`
 object as output for tools that produce a raster. There will be file paths 
 associated with that R object. 
 
@@ -134,30 +135,19 @@ class(t1$result$output)
 The user still needs to specify paths but `wbt()` eases the process
 of converting input objects to paths and reading output paths to R objects
 after the tool has run. In principle any R object that references a file with
-type that Whitebox supports can be handled under the current (simple; proof of
+type that 'WhiteboxTools' supports can be handled under the current (simple; proof of
 concept) system. Using file-based representations may not be the most
-efficient, but allows for a tangible trail of the steps in a workflow to be
-followed that otherwise might be hard to track.
+efficient when your R object only previously existed in memory, it allows 
+for a tangible file "trail" of steps in a workflow that were followed that 
+otherwise might be hard to track.
 
 # `wbt_source()`: rasters in memory, and vector data
 
-The terra and raster packages use pointers to a file/raster connection except 
-when a grid is entirely in memory. Processing these types of rasters with 
-whitebox requires writing out as a temporary GeoTIFF file for tool input. In general
-`wbt()` can handle this for you.
+The terra and raster packages typically use pointers to a file/raster connection, except when a grid is entirely in memory. When processing in-memory rasters with 'WhiteboxTools', it's necessary to write out the object as a temporary GeoTIFF file for tool input. Fortunately, the `wbt()` method handles this step automatically.
 
-Vector data (point, line and polygon geometries) are commonly stored stored in 
-sf data.frames, sp objects, or terra SpatVector objects. These types are
-read into memory on creation. 
+Vector data in the form of point, line, and polygon geometries can be stored in sf data.frames, sp objects, or terra SpatVector objects. These objects are read into memory when created in R. As it's sometimes necessary to process vector data with 'WhiteboxTools', the `wbt_source()` method can read vector data and annotate it with information about the source file path. By using `wbt_source()`, users can process vector data with `wbt()` while minimizing overhead, i.e., without creating a temporary file for 'WhiteboxTools' to read.
 
-Reading vector data into R memory is
-not needed to run Whitebox tools, so `wbt_source()` provides a means to annotate objects 
-with information about source file path (similar to how terra/raster handle raster sources)
-such that they can be processed further  by `wbt()` with minimal overhead. 
-Objects like the terra SpatVectorProxy use delayed read by default. Passing a file path 
-to `wbt_source()` will create a SpatVectorProxy with necessary information for use with `wbt()`. 
-
-For instance, we can create a reference for a sample ESRI Shapefile via `wbt_source()`. The result is a SpatVectorProxy.
+The `wbt_source()` method can create a reference for a sample ESRI Shapefile or any other vector data source that can be read by sf, sp, or terra. The result is a SpatVectorProxy object that can be used with `wbt()` for processing spatial data. If a file path is passed to `wbt_source()`, a SpatVectorProxy with the necessary information is created automatically. For instance, to create a reference for a sample ESRI Shapefile, users can call `wbt_source()` and pass the file path as an argument:
 
 ```{r}
 library(terra)
@@ -165,6 +155,8 @@ shp <- system.file("ex/lux.shp", package = "terra")
 x <- wbt_source(shp)
 x
 ```
+
+The result is a SpatVectorProxy.
 
 The SpatVectorProxy provides a light-weight means to create an R object reference to a large file; allowing the "heavy" lifting for that file to be done primarily by WhiteboxTools (or GDAL via {terra}).
 
@@ -209,7 +201,7 @@ x2 <- wbt(x, tool_name = "slope", output = file.path(tempdir(), "curvature.tif")
 
 ## Using pipes
 
-Nested chained operation syntax can be transformed to use pipe operators ({base} R 4.1+ `|>` or {magrittr} `%>%`). This can improve the readability of the code (fewer nested parentheses) and the first argument transfer behavior allows results from each step to be transferred to the input of the next.
+Users can use pipe operators to transform sequences of 'WhiteboxTools' calls that depend on each other. In magrittr's `%>%` and base R's `|>` syntax (R 4.1+), the output of the function on the left-hand side is automatically set as the first argument of the function on the right-hand side. This allows users to chain functions together, passing the output of one function as the input to the next, and can significantly simplify the code and improve readability.
 
 ```{r, eval = FALSE, purl = FALSE}
 wbt("slope", dem = dem, output = file.path(tempdir(), "slope.tif")) |>

@@ -70,11 +70,11 @@ This command always returns a "default" path, whether or not you have WhiteboxTo
 
 ### Interfacing with R spatial packages
 
-WhiteboxTools input and output are specified as file paths to rasters in GeoTIFF format, shapefiles, HTML output, LiDAR-related files, and more.
+WhiteboxTools is a powerful software for geospatial analysis that provides input and output in the form of file paths to rasters in GeoTIFF format, shapefiles, HTML output, LiDAR-related files, and more. To visualize the output, we recommend using the terra package, which provides efficient and flexible vector and raster manipulation and visualization capabilities. Alternatively, you can use other R packages such as raster or stars for handling GeoTIFF output.
 
-In this vignette we will use the `terra` package for visualization. Just as easily we could have used `raster`, `stars` or other options available in the R ecosystem for handling the GeoTIFF output.
+To work with the output data in R, it's important to save the file paths as variables so that they can be easily loaded into R spatial objects after processing. You can then use the spatial objects for further analysis, visualization, and integration with other spatial data sources.
 
-The main way to view your output is to save "output" file paths as a variable so that you can use them after processing to load the result into an R spatial object.
+This vignette provides a step-by-step guide to interface with R spatial packages, load the WhiteboxTools output into R spatial objects, and demonstrate various analysis and visualization techniques using the terra package. We will also show how to use the whitebox R package to run WhiteboxTools algorithms and process spatial data efficiently within R.
 
 #### Working with Raster Data
 
