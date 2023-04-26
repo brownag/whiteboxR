@@ -3,20 +3,35 @@
 \docType{data}
 \name{wbttools}
 \alias{wbttools}
-\title{WhiteboxTools Tool List}
+\title{'WhiteboxTools' Tool List}
 \format{
-A data.frame with 448 observations of 4 variables
-\itemize{
-\item \code{"tool_name"} - WhiteboxTools tool name
-\item \code{"toolbox_name"} - WhiteboxTools toolbox name
-\item \code{"description"} - Brief description
-\item \code{"function_name"} - R function name
-}
+An object of class \code{data.frame} with 545 rows and 8 columns.
 }
 \source{
-\href{https://github.com/jblindsay/whitebox-tools/releases/tag/1.5.0}{WhiteboxTools 1.5.0}
+\href{https://github.com/jblindsay/whitebox-tools/releases/}{WhiteboxTools}
+}
+\usage{
+wbttools
 }
 \description{
-This data set is a \code{data.frame} containing tools by name and associated R function name, as available in WhiteboxTools 1.5.0
+This data set is a \code{data.frame} containing tools by name and associated R function name
 }
+\section{Variables}{
+
+\itemize{
+\item \code{"tool_name"} - 'WhiteboxTools' tool name
+\item \code{"function_name"} - R function name
+\item \code{"toolbox_name"} - 'WhiteboxTools' toolbox name
+\item \code{"label"} - 'WhiteboxTools' tool label
+\item \code{"description"} - Brief description
+\item \code{"github"} - Link to related code on 'GitHub'
+\item \code{"book"} - Link to 'WhiteboxTools' Manual
+\item \code{"is_extension"} - Tool is part of 'General Toolset Extension' (GTE), as opposed to the "open core"
+}
+}
+
+\seealso{
+\link{wbttoolparameters} \code{\link[=wbt_list_tools]{wbt_list_tools()}}
+}
+\keyword{General}
 \keyword{datasets}

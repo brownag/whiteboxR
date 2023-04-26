@@ -3,14 +3,18 @@
   #   1. interactively, or 
   #   2. environment var R_WHITEBOX_VERBOSE=TRUE or package option whitebox.verbose=TRUE
   check_whitebox_binary(silent = !wbt_verbose())
+  
+  # keep track of whether we have warned about version difference
+  assign("whitebox.warned_version_difference", value = FALSE, envir = whitebox.env)
 }
 
-#' Check for WhiteboxTools executable path
+#' Check for 'WhiteboxTools' executable path
 #'
 #' @param silent logical. Print help on installation/setting path. Default `TRUE`.
 #' @seealso [wbt_exe_path()]
-#' @return logical if WhiteboxTools executable file exists.
+#' @return logical if 'WhiteboxTools' executable file exists.
 #' @export
+#' @keywords General
 check_whitebox_binary <- function(silent = TRUE) {
 
   # look in standard locations
@@ -33,7 +37,7 @@ check_whitebox_binary <- function(silent = TRUE) {
       "For whitebox package documentation, ask for help:\n",
       "    > ??whitebox\n",
       "\n",
-      "For more information visit https://giswqs.github.io/whiteboxR/\n",
+      "For more information visit https://whiteboxR.gishub.org/\n",
       "\n",
       "------------------------------------------------------------------------\n")
     message(msg)

@@ -14,7 +14,8 @@ wbt_vector_points_to_raster(
   base = NULL,
   wd = NULL,
   verbose_mode = FALSE,
-  compress_rasters = FALSE
+  compress_rasters = FALSE,
+  command_only = FALSE
 )
 }
 \arguments{
@@ -24,7 +25,7 @@ wbt_vector_points_to_raster(
 
 \item{field}{Input field name in attribute table.}
 
-\item{assign}{Assignment operation, where multiple points are in the same grid cell; options include 'first', 'last' (default), 'min', 'max', 'sum'.}
+\item{assign}{Assignment operation, where multiple points are in the same grid cell; options include 'first', 'last' (default), 'min', 'max', 'sum', 'number'.}
 
 \item{nodata}{Background value to set to NoData. Without this flag, it will be set to 0.0.}
 
@@ -34,9 +35,11 @@ wbt_vector_points_to_raster(
 
 \item{wd}{Changes the working directory.}
 
-\item{verbose_mode}{Sets verbose mode. If verbose mode is False, tools will not print output messages.}
+\item{verbose_mode}{Sets verbose mode. If verbose mode is \code{FALSE}, tools will not print output messages.}
 
-\item{compress_rasters}{Sets the flag used by WhiteboxTools to determine whether to use compression for output rasters.}
+\item{compress_rasters}{Sets the flag used by 'WhiteboxTools' to determine whether to use compression for output rasters.}
+
+\item{command_only}{Return command that would be executed by \code{system()} rather than running tool.}
 }
 \value{
 Returns the tool text outputs.
@@ -44,3 +47,4 @@ Returns the tool text outputs.
 \description{
 Converts a vector containing points into a raster.
 }
+\keyword{DataTools}

@@ -31,10 +31,14 @@ test_that("wbt initialization [WhiteboxTools missing]", {
 
   # now whitebox sees it (doesn't know it's not a valid executable, just that file exists)
   expect_true(wbt_init(exe_path = tf))
-  
+
   # try running a tool with the fake path; errors are caught
   #   - cant execute the text file; ignore.stderr = hide system err output during testing
-  expect_message(res <- wbt_system_call("--run=slope --dem=foo.tif --output=bar.tif", ignore.stderr = TRUE))
+  if (Sys.info()[["sysname"]] == "Windows") {
+    expect_silent({res <- wbt_system_call("--run=slope --dem=foo.tif --output=bar.tif", ignore.stderr = TRUE)})
+  } else {
+    expect_message({res <- wbt_system_call("--run=slope --dem=foo.tif --output=bar.tif", ignore.stderr = TRUE)})
+  }
 
   # an error will return a character containing the error message
   expect_true(is.character(res))
@@ -48,13 +52,28 @@ test_that("wbt initialization [WhiteboxTools missing]", {
   if (sysbak != "") Sys.setenv("R_WHITEBOX_EXE_PATH" = sysbak)
 })
 
-test_that("wbt working directories", {
+test_that("wbt path expansion", {
+  dem <- as.character(wbt_file_path("~/dem.tif", shell_quote = FALSE))
+  dem3a <- as.character(wbt_file_path("~/dem1.tif;~/dem2.tif;~/dem3.tif"))
+  dem3b <- as.character(wbt_file_path("~/dem1.tif,~/dem2.tif,~/dem3.tif"))
+  expect_equal(dem, file.path(path.expand("~"), "dem.tif"))
+
+
+  expect_equal(dem3a, shQuote(paste0(file.path(path.expand("~"),
+                                     sprintf("dem%s.tif", 1:3)),
+                                     collapse = ",")))
+  expect_equal(dem3a, dem3b)
+})
+
+test_that("wbt setting and using working directories", {
 
   skip_on_cran()
 
   skip_if_not(check_whitebox_binary())
 
-  dem <- whitebox:::sample_dem_data()
+  dem <- sample_dem_data()
+
+  skip_if(dem == "")
 
   tf <- tempfile(fileext = ".tif")
 
@@ -88,11 +107,18 @@ test_that("wbt working directories", {
   expect_length(list.files(pattern = basename(tf)), 0)
   expect_length(list.files(path = mywd, pattern = basename(tf)), 1)
 
-  # NA or "" are converted to getwd()
+  # NA or "" are converted to getwd() with an attribute set to remove the flag after next
   expect_equal(wbt_wd(NA), "")
 
   # cleanup
   unlink(tf)
+})
+
+test_that("wbt reset working directory", {
+
+  skip_on_cran()
+
+  skip_if_not(check_whitebox_binary())
 
   ## RESETTING A WORKING DIRECTORY (unset attribute of whitebox.wd)
 
@@ -102,7 +128,8 @@ test_that("wbt working directories", {
   # run a tool
   wbt_run_tool("slope", paste0("--dem=", system.file("extdata/DEM.tif", package = "whitebox"), " --output=1.tif"))
 
-  # "unset" working directory (to R getwd()) -- special attribute added to option
+  # TODO: set to "" not getwd()
+  # "unset" working directory -- special attribute added to option
   wbt_wd(wd = "")
 
   # get command before: there is no wd flag on first call if background system call worked
@@ -164,22 +191,44 @@ test_that("wbt utility functions [requires WhiteboxTools installed]", {
   expect_true(is.character(wbt_tool_help()))
 })
 
+test_that("wbt raster compression (requires WhiteboxTools v2.1.0 or higher)", {
+
+  skip_on_cran()
+
+  skip_if_not(check_whitebox_binary())
+
+  skip_if_not(gsub("WhiteboxTools v([^ ]+) .*", "\\1", wbt_version()[1]) >= "2.1.0")
+
+  dem <- sample_dem_data()
+
+  skip_if(dem == "")
+
+  wbt_geomorphons(sample_dem_data(), output = "test_compressed.tif", compress_rasters = TRUE)
+
+  wbt_geomorphons(sample_dem_data(), output = "test_no-compress.tif", compress_rasters = FALSE)
+
+  expect_true(file.size("test_compressed.tif") < file.size("test_no-compress.tif"))
+
+  unlink(c("test_compressed.tif", "test_no-compress.tif"))
+
+})
+
 test_that("wbt tool name cleaning", {
 
   # wbt_internal_tool_name(): The internal tool name method is a single place for "name cleaning" to happen so it is standard. It deals with some of the messiness with converting between R function names and WBT tool names.
-  expect_equal(wbt_internal_tool_name("wbt_wetness_index"), "wetness_index")
-  expect_equal(wbt_internal_tool_name("whitebox::wbt_wetness_index"), "wetness_index")
+  expect_equal(wbt_internal_tool_name("wbt_wetness_index"), "WetnessIndex")
+  expect_equal(wbt_internal_tool_name("whitebox::wbt_wetness_index"), "WetnessIndex")
   expect_equal(wbt_internal_tool_name("WetnessIndex"), "WetnessIndex")
   # underscores/snake case allowed as --run= input
 
   # commands generated from match.call() on `whitebox::wbt_wetness_index()`
   #  should match command for a pre-cleaned tool name "wetness_index"
   expect_equal(
-    whitebox::wbt_run_tool("--dem=foo.tif --output=bar.tif",
+    wbt_run_tool("--dem=foo.tif --output=bar.tif",
       tool_name = c("::", "whitebox", "wbt_wetness_index"),
       command_only = TRUE
     ),
-    whitebox:::wbt_system_call(
+    wbt_system_call(
       "--dem=foo.tif --output=bar.tif -v",
       tool_name = "wetness_index",
       command_only = TRUE

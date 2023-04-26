@@ -16,7 +16,8 @@ wbt_svm_classification(
   test_proportion = 0.2,
   wd = NULL,
   verbose_mode = FALSE,
-  compress_rasters = FALSE
+  compress_rasters = FALSE,
+  command_only = FALSE
 )
 }
 \arguments{
@@ -40,9 +41,11 @@ wbt_svm_classification(
 
 \item{wd}{Changes the working directory.}
 
-\item{verbose_mode}{Sets verbose mode. If verbose mode is False, tools will not print output messages.}
+\item{verbose_mode}{Sets verbose mode. If verbose mode is \code{FALSE}, tools will not print output messages.}
 
-\item{compress_rasters}{Sets the flag used by WhiteboxTools to determine whether to use compression for output rasters.}
+\item{compress_rasters}{Sets the flag used by 'WhiteboxTools' to determine whether to use compression for output rasters.}
+
+\item{command_only}{Return command that would be executed by \code{system()} rather than running tool.}
 }
 \value{
 Returns the tool text outputs.
@@ -50,3 +53,4 @@ Returns the tool text outputs.
 \description{
 Performs an SVM binary classification using training site polygons/points and multiple input images.
 }
+\keyword{MachineLearning}

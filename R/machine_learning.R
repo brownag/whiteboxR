@@ -1,6 +1,6 @@
-#' Dbscan
+#' @title Dbscan
 #'
-#' Performs a DBSCAN-based unsupervised clustering operation.
+#' @description Performs a DBSCAN-based unsupervised clustering operation.
 #'
 #' @param inputs Names of the input rasters.
 #' @param scaling Scaling method for predictors. Options include 'None', 'Normalize', and 'Standardize'.
@@ -8,16 +8,19 @@
 #' @param search_dist Search-distance parameter.
 #' @param min_points Minimum point density needed to define 'core' point in cluster.
 #' @param wd Changes the working directory.
-#' @param verbose_mode Sets verbose mode. If verbose mode is False, tools will not print output messages.
-#' @param compress_rasters Sets the flag used by WhiteboxTools to determine whether to use compression for output rasters.
+#' @param verbose_mode Sets verbose mode. If verbose mode is `FALSE`, tools will not print output messages.
+#' @param compress_rasters Sets the flag used by 'WhiteboxTools' to determine whether to use compression for output rasters.
+#' @param command_only Return command that would be executed by `system()` rather than running tool.
+#'
+#' @keywords MachineLearning
 #'
 #' @return Returns the tool text outputs.
 #' @export
-wbt_dbscan <- function(inputs, output, scaling="Normalize", search_dist=0.01, min_points=5, wd=NULL, verbose_mode=FALSE, compress_rasters=FALSE) {
+wbt_dbscan <- function(inputs, output, scaling="Normalize", search_dist=0.01, min_points=5, wd=NULL, verbose_mode=FALSE, compress_rasters=FALSE, command_only=FALSE) {
   wbt_init()
   args <- ""
-  args <- paste(args, paste0("--inputs=", inputs))
-  args <- paste(args, paste0("--output=", output))
+  args <- paste(args, paste0("--inputs=", wbt_file_path(inputs)))
+  args <- paste(args, paste0("--output=", wbt_file_path(output)))
   if (!is.null(scaling)) {
     args <- paste(args, paste0("--scaling=", scaling))
   }
@@ -27,20 +30,20 @@ wbt_dbscan <- function(inputs, output, scaling="Normalize", search_dist=0.01, mi
   if (!is.null(min_points)) {
     args <- paste(args, paste0("--min_points=", min_points))
   }
-  if (!is.null(wd)) {
-    args <- paste(args, paste0("--wd=", wd))
+  if (!missing(wd)) {
+    args <- paste(args, paste0("--wd=", wbt_file_path(wd)))
   }
-  if (compress_rasters) {
-    args <- paste(args, "--compress_rasters")
+  if (!missing(compress_rasters)) {
+    args <- paste(args, paste0("--compress_rasters=", compress_rasters))
   }
   tool_name <- "dbscan"
-  wbt_run_tool(tool_name, args, verbose_mode)
+  wbt_run_tool(tool_name, args, verbose_mode, command_only)
 }
 
 
-#' K means clustering
+#' @title K means clustering
 #'
-#' Performs a k-means clustering operation on a multi-spectral dataset.
+#' @description Performs a k-means clustering operation on a multi-spectral dataset.
 #'
 #' @param inputs Input raster files.
 #' @param output Output raster file.
@@ -51,17 +54,20 @@ wbt_dbscan <- function(inputs, output, scaling="Normalize", search_dist=0.01, mi
 #' @param initialize How to initialize cluster centres?.
 #' @param min_class_size Minimum class size, in pixels.
 #' @param wd Changes the working directory.
-#' @param verbose_mode Sets verbose mode. If verbose mode is False, tools will not print output messages.
-#' @param compress_rasters Sets the flag used by WhiteboxTools to determine whether to use compression for output rasters.
+#' @param verbose_mode Sets verbose mode. If verbose mode is `FALSE`, tools will not print output messages.
+#' @param compress_rasters Sets the flag used by 'WhiteboxTools' to determine whether to use compression for output rasters.
+#' @param command_only Return command that would be executed by `system()` rather than running tool.
+#'
+#' @keywords MachineLearning
 #'
 #' @return Returns the tool text outputs.
 #' @export
-wbt_k_means_clustering <- function(inputs, output, classes, out_html=NULL, max_iterations=10, class_change=2.0, initialize="diagonal", min_class_size=10, wd=NULL, verbose_mode=FALSE, compress_rasters=FALSE) {
+wbt_k_means_clustering <- function(inputs, output, classes, out_html=NULL, max_iterations=10, class_change=2.0, initialize="diagonal", min_class_size=10, wd=NULL, verbose_mode=FALSE, compress_rasters=FALSE, command_only=FALSE) {
   wbt_init()
   args <- ""
-  args <- paste(args, paste0("--inputs=", inputs))
-  args <- paste(args, paste0("--output=", output))
-  args <- paste(args, paste0("--classes=", classes))
+  args <- paste(args, paste0("--inputs=", wbt_file_path(inputs)))
+  args <- paste(args, paste0("--output=", wbt_file_path(output)))
+  args <- paste(args, paste0("--classes=", wbt_file_path(classes)))
   if (!is.null(out_html)) {
     args <- paste(args, paste0("--out_html=", out_html))
   }
@@ -77,20 +83,20 @@ wbt_k_means_clustering <- function(inputs, output, classes, out_html=NULL, max_i
   if (!is.null(min_class_size)) {
     args <- paste(args, paste0("--min_class_size=", min_class_size))
   }
-  if (!is.null(wd)) {
-    args <- paste(args, paste0("--wd=", wd))
+  if (!missing(wd)) {
+    args <- paste(args, paste0("--wd=", wbt_file_path(wd)))
   }
-  if (compress_rasters) {
-    args <- paste(args, "--compress_rasters")
+  if (!missing(compress_rasters)) {
+    args <- paste(args, paste0("--compress_rasters=", compress_rasters))
   }
   tool_name <- "k_means_clustering"
-  wbt_run_tool(tool_name, args, verbose_mode)
+  wbt_run_tool(tool_name, args, verbose_mode, command_only)
 }
 
 
-#' Knn classification
+#' @title Knn classification
 #'
-#' Performs a supervised k-nearest neighbour classification using training site polygons/points and predictor rasters.
+#' @description Performs a supervised k-nearest neighbour classification using training site polygons/points and predictor rasters.
 #'
 #' @param inputs Names of the input predictor rasters.
 #' @param scaling Scaling method for predictors. Options include 'None', 'Normalize', and 'Standardize'.
@@ -101,20 +107,25 @@ wbt_k_means_clustering <- function(inputs, output, classes, out_html=NULL, max_i
 #' @param clip Perform training data clipping to remove outlier pixels?.
 #' @param test_proportion The proportion of the dataset to include in the test split; default is 0.2.
 #' @param wd Changes the working directory.
-#' @param verbose_mode Sets verbose mode. If verbose mode is False, tools will not print output messages.
-#' @param compress_rasters Sets the flag used by WhiteboxTools to determine whether to use compression for output rasters.
+#' @param verbose_mode Sets verbose mode. If verbose mode is `FALSE`, tools will not print output messages.
+#' @param compress_rasters Sets the flag used by 'WhiteboxTools' to determine whether to use compression for output rasters.
+#' @param command_only Return command that would be executed by `system()` rather than running tool.
+#'
+#' @keywords MachineLearning
 #'
 #' @return Returns the tool text outputs.
 #' @export
-wbt_knn_classification <- function(inputs, training, field, output, scaling="Normalize", k=5, clip=TRUE, test_proportion=0.2, wd=NULL, verbose_mode=FALSE, compress_rasters=FALSE) {
+wbt_knn_classification <- function(inputs, training, field, scaling="Normalize", output=NULL, k=5, clip=TRUE, test_proportion=0.2, wd=NULL, verbose_mode=FALSE, compress_rasters=FALSE, command_only=FALSE) {
   wbt_init()
   args <- ""
-  args <- paste(args, paste0("--inputs=", inputs))
-  args <- paste(args, paste0("--training=", training))
-  args <- paste(args, paste0("--field=", field))
-  args <- paste(args, paste0("--output=", output))
+  args <- paste(args, paste0("--inputs=", wbt_file_path(inputs)))
+  args <- paste(args, paste0("--training=", wbt_file_path(training)))
+  args <- paste(args, paste0("--field=", wbt_file_path(field)))
   if (!is.null(scaling)) {
     args <- paste(args, paste0("--scaling=", scaling))
+  }
+  if (!is.null(output)) {
+    args <- paste(args, paste0("--output=", wbt_file_path(output)))
   }
   if (!is.null(k)) {
     args <- paste(args, paste0("--k=", k))
@@ -125,20 +136,20 @@ wbt_knn_classification <- function(inputs, training, field, output, scaling="Nor
   if (!is.null(test_proportion)) {
     args <- paste(args, paste0("--test_proportion=", test_proportion))
   }
-  if (!is.null(wd)) {
-    args <- paste(args, paste0("--wd=", wd))
+  if (!missing(wd)) {
+    args <- paste(args, paste0("--wd=", wbt_file_path(wd)))
   }
-  if (compress_rasters) {
-    args <- paste(args, "--compress_rasters")
+  if (!missing(compress_rasters)) {
+    args <- paste(args, paste0("--compress_rasters=", compress_rasters))
   }
   tool_name <- "knn_classification"
-  wbt_run_tool(tool_name, args, verbose_mode)
+  wbt_run_tool(tool_name, args, verbose_mode, command_only)
 }
 
 
-#' Knn regression
+#' @title Knn regression
 #'
-#' Performs a supervised k-nearest neighbour regression using training site points and predictor rasters.
+#' @description Performs a supervised k-nearest neighbour regression using training site points and predictor rasters.
 #'
 #' @param inputs Names of the input predictor rasters.
 #' @param scaling Scaling method for predictors. Options include 'None', 'Normalize', and 'Standardize'.
@@ -149,22 +160,25 @@ wbt_knn_classification <- function(inputs, training, field, output, scaling="Nor
 #' @param weight Use distance weighting?.
 #' @param test_proportion The proportion of the dataset to include in the test split; default is 0.2.
 #' @param wd Changes the working directory.
-#' @param verbose_mode Sets verbose mode. If verbose mode is False, tools will not print output messages.
-#' @param compress_rasters Sets the flag used by WhiteboxTools to determine whether to use compression for output rasters.
+#' @param verbose_mode Sets verbose mode. If verbose mode is `FALSE`, tools will not print output messages.
+#' @param compress_rasters Sets the flag used by 'WhiteboxTools' to determine whether to use compression for output rasters.
+#' @param command_only Return command that would be executed by `system()` rather than running tool.
+#'
+#' @keywords MachineLearning
 #'
 #' @return Returns the tool text outputs.
 #' @export
-wbt_knn_regression <- function(inputs, training, field, scaling="Normalize", output=NULL, k=5, weight=TRUE, test_proportion=0.2, wd=NULL, verbose_mode=FALSE, compress_rasters=FALSE) {
+wbt_knn_regression <- function(inputs, training, field, scaling="Normalize", output=NULL, k=5, weight=TRUE, test_proportion=0.2, wd=NULL, verbose_mode=FALSE, compress_rasters=FALSE, command_only=FALSE) {
   wbt_init()
   args <- ""
-  args <- paste(args, paste0("--inputs=", inputs))
-  args <- paste(args, paste0("--training=", training))
-  args <- paste(args, paste0("--field=", field))
+  args <- paste(args, paste0("--inputs=", wbt_file_path(inputs)))
+  args <- paste(args, paste0("--training=", wbt_file_path(training)))
+  args <- paste(args, paste0("--field=", wbt_file_path(field)))
   if (!is.null(scaling)) {
     args <- paste(args, paste0("--scaling=", scaling))
   }
   if (!is.null(output)) {
-    args <- paste(args, paste0("--output=", output))
+    args <- paste(args, paste0("--output=", wbt_file_path(output)))
   }
   if (!is.null(k)) {
     args <- paste(args, paste0("--k=", k))
@@ -175,20 +189,20 @@ wbt_knn_regression <- function(inputs, training, field, scaling="Normalize", out
   if (!is.null(test_proportion)) {
     args <- paste(args, paste0("--test_proportion=", test_proportion))
   }
-  if (!is.null(wd)) {
-    args <- paste(args, paste0("--wd=", wd))
+  if (!missing(wd)) {
+    args <- paste(args, paste0("--wd=", wbt_file_path(wd)))
   }
-  if (compress_rasters) {
-    args <- paste(args, "--compress_rasters")
+  if (!missing(compress_rasters)) {
+    args <- paste(args, paste0("--compress_rasters=", compress_rasters))
   }
   tool_name <- "knn_regression"
-  wbt_run_tool(tool_name, args, verbose_mode)
+  wbt_run_tool(tool_name, args, verbose_mode, command_only)
 }
 
 
-#' Logistic regression
+#' @title Logistic regression
 #'
-#' Performs a logistic regression analysis using training site polygons/points and predictor rasters.
+#' @description Performs a logistic regression analysis using training site polygons/points and predictor rasters.
 #'
 #' @param inputs Names of the input predictor rasters.
 #' @param scaling Scaling method for predictors. Options include 'None', 'Normalize', and 'Standardize'.
@@ -197,40 +211,43 @@ wbt_knn_regression <- function(inputs, training, field, scaling="Normalize", out
 #' @param output Name of the output raster file.
 #' @param test_proportion The proportion of the dataset to include in the test split; default is 0.2.
 #' @param wd Changes the working directory.
-#' @param verbose_mode Sets verbose mode. If verbose mode is False, tools will not print output messages.
-#' @param compress_rasters Sets the flag used by WhiteboxTools to determine whether to use compression for output rasters.
+#' @param verbose_mode Sets verbose mode. If verbose mode is `FALSE`, tools will not print output messages.
+#' @param compress_rasters Sets the flag used by 'WhiteboxTools' to determine whether to use compression for output rasters.
+#' @param command_only Return command that would be executed by `system()` rather than running tool.
+#'
+#' @keywords MachineLearning
 #'
 #' @return Returns the tool text outputs.
 #' @export
-wbt_logistic_regression <- function(inputs, training, field, scaling="Normalize", output=NULL, test_proportion=0.2, wd=NULL, verbose_mode=FALSE, compress_rasters=FALSE) {
+wbt_logistic_regression <- function(inputs, training, field, scaling="Normalize", output=NULL, test_proportion=0.2, wd=NULL, verbose_mode=FALSE, compress_rasters=FALSE, command_only=FALSE) {
   wbt_init()
   args <- ""
-  args <- paste(args, paste0("--inputs=", inputs))
-  args <- paste(args, paste0("--training=", training))
-  args <- paste(args, paste0("--field=", field))
+  args <- paste(args, paste0("--inputs=", wbt_file_path(inputs)))
+  args <- paste(args, paste0("--training=", wbt_file_path(training)))
+  args <- paste(args, paste0("--field=", wbt_file_path(field)))
   if (!is.null(scaling)) {
     args <- paste(args, paste0("--scaling=", scaling))
   }
   if (!is.null(output)) {
-    args <- paste(args, paste0("--output=", output))
+    args <- paste(args, paste0("--output=", wbt_file_path(output)))
   }
   if (!is.null(test_proportion)) {
     args <- paste(args, paste0("--test_proportion=", test_proportion))
   }
-  if (!is.null(wd)) {
-    args <- paste(args, paste0("--wd=", wd))
+  if (!missing(wd)) {
+    args <- paste(args, paste0("--wd=", wbt_file_path(wd)))
   }
-  if (compress_rasters) {
-    args <- paste(args, "--compress_rasters")
+  if (!missing(compress_rasters)) {
+    args <- paste(args, paste0("--compress_rasters=", compress_rasters))
   }
   tool_name <- "logistic_regression"
-  wbt_run_tool(tool_name, args, verbose_mode)
+  wbt_run_tool(tool_name, args, verbose_mode, command_only)
 }
 
 
-#' Modified k means clustering
+#' @title Modified k means clustering
 #'
-#' Performs a modified k-means clustering operation on a multi-spectral dataset.
+#' @description Performs a modified k-means clustering operation on a multi-spectral dataset.
 #'
 #' @param inputs Input raster files.
 #' @param output Output raster file.
@@ -240,16 +257,19 @@ wbt_logistic_regression <- function(inputs, training, field, scaling="Normalize"
 #' @param max_iterations Maximum number of iterations.
 #' @param class_change Minimum percent of cells changed between iterations before completion.
 #' @param wd Changes the working directory.
-#' @param verbose_mode Sets verbose mode. If verbose mode is False, tools will not print output messages.
-#' @param compress_rasters Sets the flag used by WhiteboxTools to determine whether to use compression for output rasters.
+#' @param verbose_mode Sets verbose mode. If verbose mode is `FALSE`, tools will not print output messages.
+#' @param compress_rasters Sets the flag used by 'WhiteboxTools' to determine whether to use compression for output rasters.
+#' @param command_only Return command that would be executed by `system()` rather than running tool.
+#'
+#' @keywords MachineLearning
 #'
 #' @return Returns the tool text outputs.
 #' @export
-wbt_modified_k_means_clustering <- function(inputs, output, out_html=NULL, start_clusters=1000, merge_dist=NULL, max_iterations=10, class_change=2.0, wd=NULL, verbose_mode=FALSE, compress_rasters=FALSE) {
+wbt_modified_k_means_clustering <- function(inputs, output, out_html=NULL, start_clusters=1000, merge_dist=NULL, max_iterations=10, class_change=2.0, wd=NULL, verbose_mode=FALSE, compress_rasters=FALSE, command_only=FALSE) {
   wbt_init()
   args <- ""
-  args <- paste(args, paste0("--inputs=", inputs))
-  args <- paste(args, paste0("--output=", output))
+  args <- paste(args, paste0("--inputs=", wbt_file_path(inputs)))
+  args <- paste(args, paste0("--output=", wbt_file_path(output)))
   if (!is.null(out_html)) {
     args <- paste(args, paste0("--out_html=", out_html))
   }
@@ -265,20 +285,20 @@ wbt_modified_k_means_clustering <- function(inputs, output, out_html=NULL, start
   if (!is.null(class_change)) {
     args <- paste(args, paste0("--class_change=", class_change))
   }
-  if (!is.null(wd)) {
-    args <- paste(args, paste0("--wd=", wd))
+  if (!missing(wd)) {
+    args <- paste(args, paste0("--wd=", wbt_file_path(wd)))
   }
-  if (compress_rasters) {
-    args <- paste(args, "--compress_rasters")
+  if (!missing(compress_rasters)) {
+    args <- paste(args, paste0("--compress_rasters=", compress_rasters))
   }
   tool_name <- "modified_k_means_clustering"
-  wbt_run_tool(tool_name, args, verbose_mode)
+  wbt_run_tool(tool_name, args, verbose_mode, command_only)
 }
 
 
-#' Random forest classification
+#' @title Random forest classification
 #'
-#' Performs a supervised random forest classification using training site polygons/points and predictor rasters.
+#' @description Performs a supervised random forest classification using training site polygons/points and predictor rasters.
 #'
 #' @param inputs Names of the input predictor rasters.
 #' @param training Name of the input training site polygons/points shapefile.
@@ -290,19 +310,22 @@ wbt_modified_k_means_clustering <- function(inputs, output, out_html=NULL, start
 #' @param min_samples_split The minimum number of samples required to split an internal node.
 #' @param test_proportion The proportion of the dataset to include in the test split; default is 0.2.
 #' @param wd Changes the working directory.
-#' @param verbose_mode Sets verbose mode. If verbose mode is False, tools will not print output messages.
-#' @param compress_rasters Sets the flag used by WhiteboxTools to determine whether to use compression for output rasters.
+#' @param verbose_mode Sets verbose mode. If verbose mode is `FALSE`, tools will not print output messages.
+#' @param compress_rasters Sets the flag used by 'WhiteboxTools' to determine whether to use compression for output rasters.
+#' @param command_only Return command that would be executed by `system()` rather than running tool.
+#'
+#' @keywords MachineLearning
 #'
 #' @return Returns the tool text outputs.
 #' @export
-wbt_random_forest_classification <- function(inputs, training, field, output=NULL, split_criterion="Gini", n_trees=500, min_samples_leaf=1, min_samples_split=2, test_proportion=0.2, wd=NULL, verbose_mode=FALSE, compress_rasters=FALSE) {
+wbt_random_forest_classification <- function(inputs, training, field, output=NULL, split_criterion="Gini", n_trees=500, min_samples_leaf=1, min_samples_split=2, test_proportion=0.2, wd=NULL, verbose_mode=FALSE, compress_rasters=FALSE, command_only=FALSE) {
   wbt_init()
   args <- ""
-  args <- paste(args, paste0("--inputs=", inputs))
-  args <- paste(args, paste0("--training=", training))
-  args <- paste(args, paste0("--field=", field))
+  args <- paste(args, paste0("--inputs=", wbt_file_path(inputs)))
+  args <- paste(args, paste0("--training=", wbt_file_path(training)))
+  args <- paste(args, paste0("--field=", wbt_file_path(field)))
   if (!is.null(output)) {
-    args <- paste(args, paste0("--output=", output))
+    args <- paste(args, paste0("--output=", wbt_file_path(output)))
   }
   if (!is.null(split_criterion)) {
     args <- paste(args, paste0("--split_criterion=", split_criterion))
@@ -319,20 +342,20 @@ wbt_random_forest_classification <- function(inputs, training, field, output=NUL
   if (!is.null(test_proportion)) {
     args <- paste(args, paste0("--test_proportion=", test_proportion))
   }
-  if (!is.null(wd)) {
-    args <- paste(args, paste0("--wd=", wd))
+  if (!missing(wd)) {
+    args <- paste(args, paste0("--wd=", wbt_file_path(wd)))
   }
-  if (compress_rasters) {
-    args <- paste(args, "--compress_rasters")
+  if (!missing(compress_rasters)) {
+    args <- paste(args, paste0("--compress_rasters=", compress_rasters))
   }
   tool_name <- "random_forest_classification"
-  wbt_run_tool(tool_name, args, verbose_mode)
+  wbt_run_tool(tool_name, args, verbose_mode, command_only)
 }
 
 
-#' Random forest regression
+#' @title Random forest regression
 #'
-#' Performs a random forest regression analysis using training site data and predictor rasters.
+#' @description Performs a random forest regression analysis using training site data and predictor rasters.
 #'
 #' @param inputs Names of the input predictor rasters.
 #' @param training Name of the input training site points shapefile.
@@ -343,19 +366,22 @@ wbt_random_forest_classification <- function(inputs, training, field, output=NUL
 #' @param min_samples_split The minimum number of samples required to split an internal node.
 #' @param test_proportion The proportion of the dataset to include in the test split; default is 0.2.
 #' @param wd Changes the working directory.
-#' @param verbose_mode Sets verbose mode. If verbose mode is False, tools will not print output messages.
-#' @param compress_rasters Sets the flag used by WhiteboxTools to determine whether to use compression for output rasters.
+#' @param verbose_mode Sets verbose mode. If verbose mode is `FALSE`, tools will not print output messages.
+#' @param compress_rasters Sets the flag used by 'WhiteboxTools' to determine whether to use compression for output rasters.
+#' @param command_only Return command that would be executed by `system()` rather than running tool.
+#'
+#' @keywords MachineLearning
 #'
 #' @return Returns the tool text outputs.
 #' @export
-wbt_random_forest_regression <- function(inputs, training, field, output=NULL, n_trees=100, min_samples_leaf=1, min_samples_split=2, test_proportion=0.2, wd=NULL, verbose_mode=FALSE, compress_rasters=FALSE) {
+wbt_random_forest_regression <- function(inputs, training, field, output=NULL, n_trees=100, min_samples_leaf=1, min_samples_split=2, test_proportion=0.2, wd=NULL, verbose_mode=FALSE, compress_rasters=FALSE, command_only=FALSE) {
   wbt_init()
   args <- ""
-  args <- paste(args, paste0("--inputs=", inputs))
-  args <- paste(args, paste0("--training=", training))
-  args <- paste(args, paste0("--field=", field))
+  args <- paste(args, paste0("--inputs=", wbt_file_path(inputs)))
+  args <- paste(args, paste0("--training=", wbt_file_path(training)))
+  args <- paste(args, paste0("--field=", wbt_file_path(field)))
   if (!is.null(output)) {
-    args <- paste(args, paste0("--output=", output))
+    args <- paste(args, paste0("--output=", wbt_file_path(output)))
   }
   if (!is.null(n_trees)) {
     args <- paste(args, paste0("--n_trees=", n_trees))
@@ -369,20 +395,20 @@ wbt_random_forest_regression <- function(inputs, training, field, output=NULL, n
   if (!is.null(test_proportion)) {
     args <- paste(args, paste0("--test_proportion=", test_proportion))
   }
-  if (!is.null(wd)) {
-    args <- paste(args, paste0("--wd=", wd))
+  if (!missing(wd)) {
+    args <- paste(args, paste0("--wd=", wbt_file_path(wd)))
   }
-  if (compress_rasters) {
-    args <- paste(args, "--compress_rasters")
+  if (!missing(compress_rasters)) {
+    args <- paste(args, paste0("--compress_rasters=", compress_rasters))
   }
   tool_name <- "random_forest_regression"
-  wbt_run_tool(tool_name, args, verbose_mode)
+  wbt_run_tool(tool_name, args, verbose_mode, command_only)
 }
 
 
-#' Svm classification
+#' @title Svm classification
 #'
-#' Performs an SVM binary classification using training site polygons/points and multiple input images.
+#' @description Performs an SVM binary classification using training site polygons/points and multiple input images.
 #'
 #' @param inputs Names of the input predictor rasters.
 #' @param scaling Scaling method for predictors. Options include 'None', 'Normalize', and 'Standardize'.
@@ -394,22 +420,25 @@ wbt_random_forest_regression <- function(inputs, training, field, output=NULL, n
 #' @param tolerance The tolerance parameter used in determining the stopping condition.
 #' @param test_proportion The proportion of the dataset to include in the test split; default is 0.2.
 #' @param wd Changes the working directory.
-#' @param verbose_mode Sets verbose mode. If verbose mode is False, tools will not print output messages.
-#' @param compress_rasters Sets the flag used by WhiteboxTools to determine whether to use compression for output rasters.
+#' @param verbose_mode Sets verbose mode. If verbose mode is `FALSE`, tools will not print output messages.
+#' @param compress_rasters Sets the flag used by 'WhiteboxTools' to determine whether to use compression for output rasters.
+#' @param command_only Return command that would be executed by `system()` rather than running tool.
+#'
+#' @keywords MachineLearning
 #'
 #' @return Returns the tool text outputs.
 #' @export
-wbt_svm_classification <- function(inputs, training, field, scaling="Normalize", output=NULL, c=200.0, gamma=50.0, tolerance=0.1, test_proportion=0.2, wd=NULL, verbose_mode=FALSE, compress_rasters=FALSE) {
+wbt_svm_classification <- function(inputs, training, field, scaling="Normalize", output=NULL, c=200.0, gamma=50.0, tolerance=0.1, test_proportion=0.2, wd=NULL, verbose_mode=FALSE, compress_rasters=FALSE, command_only=FALSE) {
   wbt_init()
   args <- ""
-  args <- paste(args, paste0("--inputs=", inputs))
-  args <- paste(args, paste0("--training=", training))
-  args <- paste(args, paste0("--field=", field))
+  args <- paste(args, paste0("--inputs=", wbt_file_path(inputs)))
+  args <- paste(args, paste0("--training=", wbt_file_path(training)))
+  args <- paste(args, paste0("--field=", wbt_file_path(field)))
   if (!is.null(scaling)) {
     args <- paste(args, paste0("--scaling=", scaling))
   }
   if (!is.null(output)) {
-    args <- paste(args, paste0("--output=", output))
+    args <- paste(args, paste0("--output=", wbt_file_path(output)))
   }
   if (!is.null(c)) {
     args <- paste(args, paste0("--c=", c))
@@ -423,20 +452,20 @@ wbt_svm_classification <- function(inputs, training, field, scaling="Normalize",
   if (!is.null(test_proportion)) {
     args <- paste(args, paste0("--test_proportion=", test_proportion))
   }
-  if (!is.null(wd)) {
-    args <- paste(args, paste0("--wd=", wd))
+  if (!missing(wd)) {
+    args <- paste(args, paste0("--wd=", wbt_file_path(wd)))
   }
-  if (compress_rasters) {
-    args <- paste(args, "--compress_rasters")
+  if (!missing(compress_rasters)) {
+    args <- paste(args, paste0("--compress_rasters=", compress_rasters))
   }
   tool_name <- "svm_classification"
-  wbt_run_tool(tool_name, args, verbose_mode)
+  wbt_run_tool(tool_name, args, verbose_mode, command_only)
 }
 
 
-#' Svm regression
+#' @title Svm regression
 #'
-#' Performs a supervised SVM regression analysis using training site points and predictor rasters.
+#' @description Performs a supervised SVM regression analysis using training site points and predictor rasters.
 #'
 #' @param inputs Names of the input predictor rasters.
 #' @param scaling Scaling method for predictors. Options include 'None', 'Normalize', and 'Standardize'.
@@ -448,22 +477,25 @@ wbt_svm_classification <- function(inputs, training, field, scaling="Normalize",
 #' @param gamma Gamma parameter used in setting the RBF (Gaussian) kernel function.
 #' @param test_proportion The proportion of the dataset to include in the test split; default is 0.2.
 #' @param wd Changes the working directory.
-#' @param verbose_mode Sets verbose mode. If verbose mode is False, tools will not print output messages.
-#' @param compress_rasters Sets the flag used by WhiteboxTools to determine whether to use compression for output rasters.
+#' @param verbose_mode Sets verbose mode. If verbose mode is `FALSE`, tools will not print output messages.
+#' @param compress_rasters Sets the flag used by 'WhiteboxTools' to determine whether to use compression for output rasters.
+#' @param command_only Return command that would be executed by `system()` rather than running tool.
+#'
+#' @keywords MachineLearning
 #'
 #' @return Returns the tool text outputs.
 #' @export
-wbt_svm_regression <- function(inputs, training, field, scaling="Normalize", output=NULL, c=50.0, eps=10.0, gamma=0.5, test_proportion=0.2, wd=NULL, verbose_mode=FALSE, compress_rasters=FALSE) {
+wbt_svm_regression <- function(inputs, training, field, scaling="Normalize", output=NULL, c=50.0, eps=10.0, gamma=0.5, test_proportion=0.2, wd=NULL, verbose_mode=FALSE, compress_rasters=FALSE, command_only=FALSE) {
   wbt_init()
   args <- ""
-  args <- paste(args, paste0("--inputs=", inputs))
-  args <- paste(args, paste0("--training=", training))
-  args <- paste(args, paste0("--field=", field))
+  args <- paste(args, paste0("--inputs=", wbt_file_path(inputs)))
+  args <- paste(args, paste0("--training=", wbt_file_path(training)))
+  args <- paste(args, paste0("--field=", wbt_file_path(field)))
   if (!is.null(scaling)) {
     args <- paste(args, paste0("--scaling=", scaling))
   }
   if (!is.null(output)) {
-    args <- paste(args, paste0("--output=", output))
+    args <- paste(args, paste0("--output=", wbt_file_path(output)))
   }
   if (!is.null(c)) {
     args <- paste(args, paste0("--c=", c))
@@ -477,14 +509,14 @@ wbt_svm_regression <- function(inputs, training, field, scaling="Normalize", out
   if (!is.null(test_proportion)) {
     args <- paste(args, paste0("--test_proportion=", test_proportion))
   }
-  if (!is.null(wd)) {
-    args <- paste(args, paste0("--wd=", wd))
+  if (!missing(wd)) {
+    args <- paste(args, paste0("--wd=", wbt_file_path(wd)))
   }
-  if (compress_rasters) {
-    args <- paste(args, "--compress_rasters")
+  if (!missing(compress_rasters)) {
+    args <- paste(args, paste0("--compress_rasters=", compress_rasters))
   }
   tool_name <- "svm_regression"
-  wbt_run_tool(tool_name, args, verbose_mode)
+  wbt_run_tool(tool_name, args, verbose_mode, command_only)
 }
 
 

@@ -6,12 +6,14 @@
 \usage{
 wbt_lidar_info(
   input,
-  output = NULL,
+  output,
+  density = TRUE,
   vlr = TRUE,
   geokeys = TRUE,
   wd = NULL,
   verbose_mode = FALSE,
-  compress_rasters = FALSE
+  compress_rasters = FALSE,
+  command_only = FALSE
 )
 }
 \arguments{
@@ -19,15 +21,19 @@ wbt_lidar_info(
 
 \item{output}{Output HTML file for summary report.}
 
+\item{density}{Flag indicating whether or not to calculate the average point density and nominal point spacing.}
+
 \item{vlr}{Flag indicating whether or not to print the variable length records (VLRs).}
 
 \item{geokeys}{Flag indicating whether or not to print the geokeys.}
 
 \item{wd}{Changes the working directory.}
 
-\item{verbose_mode}{Sets verbose mode. If verbose mode is False, tools will not print output messages.}
+\item{verbose_mode}{Sets verbose mode. If verbose mode is \code{FALSE}, tools will not print output messages.}
 
-\item{compress_rasters}{Sets the flag used by WhiteboxTools to determine whether to use compression for output rasters.}
+\item{compress_rasters}{Sets the flag used by 'WhiteboxTools' to determine whether to use compression for output rasters.}
+
+\item{command_only}{Return command that would be executed by \code{system()} rather than running tool.}
 }
 \value{
 Returns the tool text outputs.
@@ -35,3 +41,4 @@ Returns the tool text outputs.
 \description{
 Prints information about a LiDAR (LAS) dataset, including header, point return frequency, and classification data and information about the variable length records (VLRs) and geokeys.
 }
+\keyword{LiDARTools}

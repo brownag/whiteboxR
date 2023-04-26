@@ -1,5 +1,9 @@
 ^CRAN-RELEASE$
+^CRAN-SUBMISSION$
+^CNAME$
+^Dockerfile$
 ^appveyor\.yml$
+^\.codecov\.yml$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^README\.Rmd$
@@ -7,10 +11,13 @@
 ^\.travis\.yml$
 ^\.github$
 ^WhiteboxTools_linux_amd64\.zip$
-^output\.tif$
+^.*\.tif$
+^.*\.json$
 ^doc$
 ^Meta$
 ^data-raw$
+^revdep$
+^_pkgdown\.yml$
 WBT/
 CRAN/
 PY2R/

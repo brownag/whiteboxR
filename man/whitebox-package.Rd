@@ -2,11 +2,13 @@
 % Please edit documentation in R/whitebox-package.R
 \docType{package}
 \name{whitebox-package}
-\alias{whitebox}
 \alias{whitebox-package}
+\alias{_PACKAGE}
+\alias{whitebox}
+\alias{whitebox.env}
 \title{whitebox: 'WhiteboxTools' R Frontend}
 \description{
-An R frontend for the 'WhiteboxTools' library, which is an advanced geospatial data analysis platform developed by Prof. John Lindsay at the University of Guelph's Geomorphometry and Hydrogeomatics Research Group. 'WhiteboxTools' can be used to perform common geographical information systems (GIS) analysis operations, such as cost-distance analysis, distance buffering, and raster reclassification. Remote sensing and image processing tasks include image enhancement (e.g. panchromatic sharpening, contrast adjustments), image mosaicing, numerous filtering operations, simple classification (k-means), and common image transformations. 'WhiteboxTools' also contains advanced tooling for spatial hydrological analysis (e.g. flow-accumulation, watershed delineation, stream network analysis, sink removal), terrain analysis (e.g. common terrain indices such as slope, curvatures, wetness index, hillshading; hypsometric analysis; multi-scale topographic position analysis), and LiDAR data processing. Suggested citation: Lindsay (2016) <doi:10.1016/j.cageo.2016.07.003>.
+An R frontend for the 'WhiteboxTools' library, which is an advanced geospatial data analysis platform developed by Prof. John Lindsay at the University of Guelph's Geomorphometry and Hydrogeomatics Research Group. 'WhiteboxTools' can be used to perform common geographical information systems (GIS) analysis operations, such as cost-distance analysis, distance buffering, and raster reclassification. Remote sensing and image processing tasks include image enhancement (e.g. panchromatic sharpening, contrast adjustments), image mosaicing, numerous filtering operations, simple classification (k-means), and common image transformations. 'WhiteboxTools' also contains advanced tooling for spatial hydrological analysis (e.g. flow-accumulation, watershed delineation, stream network analysis, sink removal), terrain analysis (e.g. common terrain indices such as slope, curvatures, wetness index, hillshading; hypsometric analysis; multi-scale topographic position analysis), and LiDAR data processing. Suggested citation: Lindsay (2016) \doi{10.1016/j.cageo.2016.07.003}.
 }
 \section{Package options}{
 
@@ -14,9 +16,11 @@ An R frontend for the 'WhiteboxTools' library, which is an advanced geospatial d
 \item \strong{\code{whitebox.exe_path}} - character. Path to executable file. The default value is the package installation directory, subdirectory \code{"WBT"}, followed by \code{whitebox_tools.exe} or \code{whitebox_tools}. Set the \code{whitebox.exe_path} option using \code{wbt_init()} \code{exe_path} argument
 \item \strong{\code{whitebox.wd}} - character. Path to WhiteboxTools working directory. Used as \code{--wd} argument for tools that support it when \code{wd} is not specified elsewhere. Note that once you have set a working directory, the directory needs to be reset to "replace" the old value; just dropping the flag will not change the working directory back to your original R working directory. To "unset" the option in the R package you can use \code{wbt_wd("")} which is equivalent to \code{wbt_wd(getwd())}. The WhiteboxTools settings and the package settings will be updated to reflect the directory change after running the next tool and the \code{--wd} flag will be dropped from system calls.
 \item \strong{\code{whitebox.verbose}} - logical. Should standard output from calls to executable be \code{cat()} out for readability? Default is result of \code{interactive()}. Individual tools may have \code{verbose_mode} setting that produce only single-line output when \code{FALSE}. These argument values are left as the defaults defined in the package documentation for that function. When \code{whitebox.verbose=FALSE} no output is produced. Set the value of \code{whitebox.verbose} with \code{wbt_verbose()} \code{verbose} argument.
+\item \strong{\code{whitebox.compress_rasters}} - logical. Should raster output from WhiteboxTools be compressed? Default: \code{FALSE}. Set the value of \code{whitebox.compress_rasters} with \code{wbt_compress_rasters()} \code{compress_rasters} argument.
+\item \strong{\code{whitebox.max_procs}} - integer. Maximum number of processes for tools that run in parallel or partially parallelize. Default: \code{-1} uses all of the available cores.
 }
 
-The package options can be overridden with system environment variables: \code{R_WHITEBOX_EXE_PATH} (character) and \code{R_WHITEBOX_VERBOSE}, respectively.
+The package options can be overridden with system environment variables: \code{R_WHITEBOX_EXE_PATH}, \code{R_WHITEBOX_WD}, \code{R_WHITEBOX_VERBOSE}, \code{R_WHITEBOX_COMPRESS_RASTERS} and \code{R_WHITEBOX_MAX_PROCS}.
 }
 
 \seealso{

@@ -8,14 +8,15 @@ wbt_knn_classification(
   inputs,
   training,
   field,
-  output,
   scaling = "Normalize",
+  output = NULL,
   k = 5,
   clip = TRUE,
   test_proportion = 0.2,
   wd = NULL,
   verbose_mode = FALSE,
-  compress_rasters = FALSE
+  compress_rasters = FALSE,
+  command_only = FALSE
 )
 }
 \arguments{
@@ -25,9 +26,9 @@ wbt_knn_classification(
 
 \item{field}{Name of the attribute containing class name data.}
 
-\item{output}{Name of the output raster file.}
-
 \item{scaling}{Scaling method for predictors. Options include 'None', 'Normalize', and 'Standardize'.}
+
+\item{output}{Name of the output raster file.}
 
 \item{k}{k-parameter, which determines the number of nearest neighbours used.}
 
@@ -37,9 +38,11 @@ wbt_knn_classification(
 
 \item{wd}{Changes the working directory.}
 
-\item{verbose_mode}{Sets verbose mode. If verbose mode is False, tools will not print output messages.}
+\item{verbose_mode}{Sets verbose mode. If verbose mode is \code{FALSE}, tools will not print output messages.}
 
-\item{compress_rasters}{Sets the flag used by WhiteboxTools to determine whether to use compression for output rasters.}
+\item{compress_rasters}{Sets the flag used by 'WhiteboxTools' to determine whether to use compression for output rasters.}
+
+\item{command_only}{Return command that would be executed by \code{system()} rather than running tool.}
 }
 \value{
 Returns the tool text outputs.
@@ -47,3 +50,4 @@ Returns the tool text outputs.
 \description{
 Performs a supervised k-nearest neighbour classification using training site polygons/points and predictor rasters.
 }
+\keyword{MachineLearning}

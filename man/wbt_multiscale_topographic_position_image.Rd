@@ -9,10 +9,12 @@ wbt_multiscale_topographic_position_image(
   meso,
   broad,
   output,
+  hillshade = NULL,
   lightness = 1.2,
   wd = NULL,
   verbose_mode = FALSE,
-  compress_rasters = FALSE
+  compress_rasters = FALSE,
+  command_only = FALSE
 )
 }
 \arguments{
@@ -24,13 +26,17 @@ wbt_multiscale_topographic_position_image(
 
 \item{output}{Output raster file.}
 
+\item{hillshade}{Input optional hillshade raster file. Note: a multi-directional (360-degree option) hillshade tends to work best in this application.}
+
 \item{lightness}{Image lightness value (default is 1.2).}
 
 \item{wd}{Changes the working directory.}
 
-\item{verbose_mode}{Sets verbose mode. If verbose mode is False, tools will not print output messages.}
+\item{verbose_mode}{Sets verbose mode. If verbose mode is \code{FALSE}, tools will not print output messages.}
 
-\item{compress_rasters}{Sets the flag used by WhiteboxTools to determine whether to use compression for output rasters.}
+\item{compress_rasters}{Sets the flag used by 'WhiteboxTools' to determine whether to use compression for output rasters.}
+
+\item{command_only}{Return command that would be executed by \code{system()} rather than running tool.}
 }
 \value{
 Returns the tool text outputs.
@@ -38,3 +44,4 @@ Returns the tool text outputs.
 \description{
 Creates a multiscale topographic position image from three DEVmax rasters of differing spatial scale ranges.
 }
+\keyword{GeomorphometricAnalysis}

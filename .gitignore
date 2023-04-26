@@ -10,5 +10,12 @@ whiteboxR.Rproj
 .vscode/
 /doc/
 /Meta/
+/revdep/
 *.zip
+*.shp
+*.shx
+*.prj
+*.dbf
+*.tif
 settings.json
+__MACOSX

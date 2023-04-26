@@ -8,6 +8,7 @@ wbt_lidar_contour(
   input,
   output = NULL,
   interval = 10,
+  base = 0,
   smooth = 5,
   parameter = "elevation",
   returns = "all",
@@ -17,7 +18,8 @@ wbt_lidar_contour(
   max_triangle_edge_length = NULL,
   wd = NULL,
   verbose_mode = FALSE,
-  compress_rasters = FALSE
+  compress_rasters = FALSE,
+  command_only = FALSE
 )
 }
 \arguments{
@@ -26,6 +28,8 @@ wbt_lidar_contour(
 \item{output}{Name of the output vector lines file.}
 
 \item{interval}{Contour interval.}
+
+\item{base}{Base contour.}
 
 \item{smooth}{Smoothing filter size (in num. points), e.g. 3, 5, 7, 9, 11.}
 
@@ -43,9 +47,11 @@ wbt_lidar_contour(
 
 \item{wd}{Changes the working directory.}
 
-\item{verbose_mode}{Sets verbose mode. If verbose mode is False, tools will not print output messages.}
+\item{verbose_mode}{Sets verbose mode. If verbose mode is \code{FALSE}, tools will not print output messages.}
 
-\item{compress_rasters}{Sets the flag used by WhiteboxTools to determine whether to use compression for output rasters.}
+\item{compress_rasters}{Sets the flag used by 'WhiteboxTools' to determine whether to use compression for output rasters.}
+
+\item{command_only}{Return command that would be executed by \code{system()} rather than running tool.}
 }
 \value{
 Returns the tool text outputs.
@@ -53,3 +59,4 @@ Returns the tool text outputs.
 \description{
 This tool creates a vector contour coverage from an input LiDAR point file.
 }
+\keyword{LiDARTools}

@@ -4,14 +4,15 @@
 # Step 2 - Create a new develop branch: git checkout -b develop
 # Step 3 - Delete the old WhiteboxTools_linux_amd64.zip in the root folder if needed
 # Step 4 - Run automation.py
-# Step 5 - Update version number and RoxygenNote in DESCRIPTION
-# Step 6 - Open whiteboxR.Rproj in RStudio and run build_check.R
-# Step 7 - Commit and push changes
-# Step 8 - Test installation from GitHub: devtools::install_github("giswqs/whiteboxR@develop")
-# Step 9 - Merge pull request on GitHub
-# Step 10 - Switch to master branch and pull updates: git checkout master | git pull
-# Step 11 - Create R package: RStudio - Build - Build Source Package
-# Step 12 - Upload to R-Forge
+# Step 5 - Run scripts to update internal datasets (data-raw/wbttools2.R; if needed)
+# Step 6 - Update version number and RoxygenNote in DESCRIPTION
+# Step 7 - Open whiteboxR.Rproj in RStudio and run build_check.R
+# Step 8 - Commit and push changes
+# Step 9 - Test installation from GitHub: devtools::install_github("opengeos/whiteboxR@develop")
+# Step 10 - Merge pull request on GitHub
+# Step 11 - Switch to master branch and pull updates: git checkout master | git pull
+# Step 12 - Create R package: RStudio - Build - Build Source Package
+# Step 13 - Upload to CRAN
 ##################################################################
 
 import os
@@ -32,11 +33,12 @@ def function_header(line):
         line = line.replace(
             "callback=None", "wd=NULL, verbose_mode=FALSE, compress_rasters=False"
         )
+        line = line.replace('function=""', 'FUN=""')
         line = line.replace("False", "FALSE")
         line = line.replace("True", "TRUE")
         line = line.replace("None", "NULL")
         line = line.replace("def ", "")
-        line = line.replace(":", "")
+        # line = line.replace(":", ":")
         line = line.replace("And", "and")
         line = line.replace("Not", "not")
         line = line.replace("Or", "or")
@@ -65,51 +67,79 @@ def function_block(line, ff):
     line = line.strip()
     function_name = line[0: line.find("(")]
     start = line.find("(") + 1
-    end = len(line) - 1
+    end = len(line) - 2
     argument = line[start:end]
-    function_head = "wbt_" + function_name + " <- function(" + argument + ") {"
+    function_head = "wbt_" + function_name + " <- function(" + argument + ", command_only=FALSE) {"
     ff.write(function_head + "\n")
     ff.write("  wbt_init()" + "\n")
     ff.write('  args <- ""' + "\n")
     arguments = argument.split(",")
     for item in arguments:
         item = item.strip()
-        if "=" not in item:
+        if "=" not in item and '"' not in item:
             ff.write(
                 '  args <- paste(args, paste0("--' + item +
-                '=", ' + item + "))" + "\n"
+                '=", wbt_file_path(' + item + ")))" + "\n"
             )
         elif "verbose" in item:
             continue
-        elif "=FALSE" in item:
-            para = item.split("=")[0]
-            ff.write("  if (" + para + ") {" + "\n")
-            ff.write('    args <- paste(args, "--' + para + '")' + "\n")
-            ff.write("  }" + "\n")
-        elif "=TRUE" in item:
+        elif not "compress_rasters" in item and "=FALSE" in item or "=TRUE" in item:
             para = item.split("=")[0]
             ff.write("  if (" + para + ") {" + "\n")
             ff.write('    args <- paste(args, "--' + para + '")' + "\n")
             ff.write("  }" + "\n")
         elif "verbose" not in item:
             para = item.split("=")[0]
-            ff.write("  if (!is.null(" + para + ")) {" + "\n")
-            ff.write(
-                '    args <- paste(args, paste0("--'
-                + para
-                + '=", '
-                + para
-                + "))"
-                + "\n"
-            )
-            ff.write("  }" + "\n")
+            if '"' not in para and "compress_rasters" in para:
+              ff.write("  if (!missing(" + para + ")) {" + "\n")
+              ff.write(
+                  '    args <- paste(args, paste0("--'
+                  + para
+                  + '=", '
+                  + para
+                  + "))"
+                  + "\n"
+              )
+              ff.write("  }" + "\n")
+            elif '"' not in para and "wd" in para:
+              ff.write("  if (!missing(" + para + ")) {" + "\n")
+              ff.write(
+                  '    args <- paste(args, paste0("--'
+                  + para
+                  + '=", wbt_file_path('
+                  + para
+                  + ")))"
+                  + "\n"
+              )
+              ff.write("  }" + "\n")
+            elif "output" in para or "inputs" in para or "variant" in para or "streams" in para or "lakes" in para:
+              ff.write("  if (!is.null(" + para + ")) {" + "\n")
+              ff.write(
+                  '    args <- paste(args, paste0("--'
+                  + para
+                  + '=", wbt_file_path('
+                  + para
+                  + ")))"
+                  + "\n"
+              )
+              ff.write("  }" + "\n")
+            elif '"' not in para:
+              ff.write("  if (!is.null(" + para + ")) {" + "\n")
+              ff.write(
+                  '    args <- paste(args, paste0("--'
+                  + para
+                  + '=", '
+                  + para
+                  + "))"
+                  + "\n"
+              )
+              ff.write("  }" + "\n")
 
     ff.write("  tool_name <- \""+function_name+"\"\n")
     # ff.write('  tool_name <- tool_name[!grepl("(whitebox|::)", tool_name)]' + "\n")
-    ff.write("  wbt_run_tool(tool_name, args, verbose_mode)" + "\n")
+    ff.write("  wbt_run_tool(tool_name, args, verbose_mode, command_only)" + "\n")
     ff.write("}" + "\n")
     ff.write("\n\n")
-
 
 # Extract function example usage
 def function_example(fun_name):
@@ -220,14 +250,21 @@ def function_example(fun_name):
 toolboxes = {
     "# Data Tools #": "data_tools.R",
     "# GIS Analysis #": "gis_analysis.R",
+    "# GIS Analysis/Distance Tools #": "gis_analysis_distance.R",
+    "# GIS Analysis/Overlay Tools #": "gis_analysis_overlay.R",
+    "# GIS Analysis/Patch Shape Tools #": "gis_analysis_patch_shape.R",
     "# Geomorphometric Analysis #": "terrain_analysis.R",
     "# Hydrological Analysis #": "hydro_analysis.R",
     "# Image Processing Tools #": "image_analysis.R",
+    "# Image Processing Tools/Classification #": "image_analysis_classification.R",
+    "# Image Processing Tools/Filters #": "image_analysis_filters.R",
+    "# Image Processing Tools/Image Enhancement #": "image_analysis_enhancement.R",
     "# LiDAR Tools #": "lidar_analysis.R",
     "# Machine Learning #": "machine_learning.R",
     "# Math and Stats Tools #": "math_stat_analysis.R",
     "# Precision Agriculture #": "precision_agriculture.R",
     "# Stream Network Analysis #": "stream_network_analysis.R",
+    "# Whitebox Utilities #": "whitebox_utilities.R"
 }
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -260,18 +297,19 @@ desc = ""
 
 with open(wbt_py) as f:
     lines = f.readlines()
-
+    tbx = ""
     for index, line in enumerate(lines):
-        if index > 566:
+        if index > 700:
             line = line.strip()
-
+            
             # Create an R script for each toolbox
             if line in toolboxes:
+                tbx = line.replace("#", "").strip().replace(" ", "").replace("/", "")
                 script_path = os.path.join(
                     dir_path, "scripts", toolboxes[line])
                 ff = open(script_path, "w")
                 print(script_path)
-
+                
                 # add code example to documentation
                 if toolboxes[line] == "math_stat_analysis.R":
                     add_example = True
@@ -282,7 +320,7 @@ with open(wbt_py) as f:
                 title = line.replace("def", "").strip().split("(")[0]
                 title = title.replace("_", " ")
                 title = title[0].upper() + title[1:]
-                ff.write("#' {}\n".format(title))
+                ff.write("#' @title {}\n".format(title))
                 ff.write("#'\n")
                 i = 1
                 while True:
@@ -292,11 +330,19 @@ with open(wbt_py) as f:
                     elif doc_line.startswith('"""'):
                         description = doc_line[3:] + "\n"
                         desc = description.strip().replace(".", "")
-                        ff.write("#' {}".format(description))
+                        ff.write("#' @description {}".format(description))
                         ff.write("#'\n")
                     elif ("--" in doc_line) and (
                         doc_line.startswith("callback") == False
                     ):
+                        # fix expected cross-reference (use code block)
+                        doc_line = doc_line.replace("[0,1]", "`[0,1]`")
+                        doc_line = doc_line.replace("[255, 255, 245]", "`[255, 255, 245]`")
+                        doc_line = doc_line.replace("[255, 255, 245, 200]", "`[255, 255, 245, 200]`")
+                        # fix reserved keywords used as argument names
+                        if doc_line.startswith("function"):
+                            doc_line = doc_line.replace("function ", "")
+                            doc_line = "FUN " + doc_line
                         if doc_line.startswith("i --"):
                             doc_line = doc_line.replace("i --", "input --")
                         doc_line = doc_line.replace("-- ", "")
@@ -305,11 +351,16 @@ with open(wbt_py) as f:
                     i = i + 1
                 ff.write("#' @param wd Changes the working directory.\n")
                 ff.write(
-                    "#' @param verbose_mode Sets verbose mode. If verbose mode is False, tools will not print output messages.\n"
+                    "#' @param verbose_mode Sets verbose mode. If verbose mode is `FALSE`, tools will not print output messages.\n"
                 )
                 ff.write(
-                    "#' @param compress_rasters Sets the flag used by WhiteboxTools to determine whether to use compression for output rasters.\n"
+                    "#' @param compress_rasters Sets the flag used by 'WhiteboxTools' to determine whether to use compression for output rasters.\n"
                 )
+                ff.write(
+                    "#' @param command_only Return command that would be executed by `system()` rather than running tool.\n"
+                )
+                ff.write("#'\n")
+                ff.write("#' @keywords {}\n".format(tbx))
                 ff.write("#'\n")
                 ff.write("#' @return Returns the tool text outputs.\n")
                 ff.write("#' @export\n")
@@ -366,10 +417,8 @@ with open(wbt_py) as f:
                         f.write('test_that("' + desc + '", {\n\n')
                         f.write("  skip_on_cran()\n")
                         f.write("  skip_if_not(check_whitebox_binary())\n")
-                        f.write(
-                            '  dem <- system.file("extdata", "DEM.tif", package = "whitebox")\n')
-                        f.write(
-                            '  ret <- {}(input = dem, output = "output.tif")\n'.format(wbt_fun_name))
+                        f.write('  dem <- sample_dem_data(); skip_if(dem == "")\n')
+                        f.write('  ret <- {}(input = dem, output = "output.tif")\n'.format(wbt_fun_name))
                         f.write('  expect_match(ret, "Elapsed Time")\n\n')
                         f.write("})\n")
                         print(test_file_path)

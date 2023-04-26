@@ -32,17 +32,13 @@ This vignette provides an introduction to the data sets included in the `whitebo
 
 ### What version of WhiteboxTools are these data sets generated from?
 
-These data sets are built to correspond to tool names available in the most recent version of WhiteboxTools and correspond to tools available in the R package.
-
  - Current version: **`r attr(wbttools, "version")`**
 
-If you have a relatively recent version of WhiteboxTools the version should not be an issue, but the data sets are not dynamically generated from your whitebox installation.
+Internal data sets and functions defined in the R package correspond to tool names available in the most recent version of WhiteboxTools. Data sets are _not_ dynamically generated from your WhiteboxTools installation. Relatively recent versions of WhiteboxTools should be supported backward-compatibly, though any newer functionality will not be usable.
 
 ## WhiteboxTools Tool Names and R Function Names
 
-The first data set provides the relationship between tool names in WhiteboxTools and the corresponding exported function in the R package.
-
-It also gives the WhiteboxTools Toolbox name and a brief description.
+The first data set describes tool names in WhiteboxTools and the corresponding exported function in the R package, along with the WhiteboxTools Toolbox name and a brief description.
 
 ```{r}
 data("wbttools", package = "whitebox")
@@ -66,23 +62,26 @@ The `wbttools` data set is a data.frame with `r nrow(wbttools)` tools and 7 vari
  
  - `"book"` - Reference manual link
  
+ - `"is_extension"` - Tool is part of General Toolset Extension (GTE), as opposed to the "open core"
+
 ```{r}
 head(wbttools)
 ```
 
 The R function naming style differs from the tool names in WhiteboxTools, but the core words are the same.
 
-There are two steps to converting WhiteboxTools to R (if not using `wbttools`!)
+
+R function names are derived from the WhiteboxTools name as follows:
+
+ 1. `PascalCase` tool names change to `snake_case`
  
- 1. `CamelCase` tool names change to `snake_case` R function names
+ 2. All R function names get the prefix `wbt_`
  
- 2. All R function names have the prefix `wbt_` and add `()`
- 
-So, `StreamSlopeContinuous` becomes `wbt_stream_slope_continuous()` in R, for instance.
+For example, `StreamSlopeContinuous` in WhiteboxTools becomes `wbt_stream_slope_continuous()` in R.
  
 ## WhiteboxTools Tool and Parameter Names
 
-The second data set provides details about the options by tool name. 
+The second data set provides details about the available function arguments by tool name. 
 
 ```{r}
 data("wbttoolparameters", package = "whitebox")
@@ -141,9 +140,6 @@ To find the tools that have an "ExistingFile" argument with file type "Raster" w
 ```{r}
 head(subset(wbttoolparameters, grepl("ExistingFile", parameter_class) & grepl("Raster", parameter_detail)))
 ```
-
-<!-- Check out the code that builds the data in `/data-raw/` on [GitHub](https://github.com/giswqs/whiteboxR/tree/master/data-raw) to see how these objects can be generated for any version of WhiteboxTools that supports JSON output for parameter metadata. -->
-<!-- Check out the code that builds the data in `/data-raw/` on [GitHub](https://github.com/giswqs/whiteboxR/tree/master/data-raw) to see how these objects can be generated for any version of WhiteboxTools that supports JSON output for parameter metadata. -->
 
 ## Appendix: Tables of Function Names by Toolbox
 
